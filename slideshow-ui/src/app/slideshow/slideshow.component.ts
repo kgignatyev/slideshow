@@ -9,31 +9,35 @@ import {ImagesSupplierService} from "../images-supplier.service";
 })
 export class SlideshowComponent implements OnInit {
 
-
+  // @ts-ignore
   timer: Observable<number>;
   // @ts-ignore
   subscription: Subscription;
 
 
-  animationDurationMilliseconds = 10000
+  animationDurationSeconds = 10
 
   constructor( private imgSupplier:ImagesSupplierService) {
-    this.timer = timer(this.animationDurationMilliseconds, this.animationDurationMilliseconds);
+
+
   }
 
-  images = [
-    '/assets/DSC_6177.jpg',
-    '/assets/DSC_6224.jpg',
-    '/assets/DSC_6151.jpg',
-    '/assets/DSC_6156.jpg'
-  ]
 
-  currentIndex = 0;
+
   image_link: string = '';
 
   ngOnInit(): void {
     this.setInitialImages();
+    this.setupTimer( this.animationDurationSeconds );
 
+  }
+
+  setupTimer(durationSeconds:number){
+    document.documentElement.style.setProperty('--duration', durationSeconds + "s");
+    if( this.subscription ){
+      this.subscription.unsubscribe();
+    }
+    this.timer = timer(durationSeconds*1000, durationSeconds*1000);
     this.subscription = this.timer.subscribe(val => {
       this.runSequence()
     });
@@ -110,4 +114,7 @@ export class SlideshowComponent implements OnInit {
       cancelFullScreen.call(doc);
     }
   }
+
+
+
 }

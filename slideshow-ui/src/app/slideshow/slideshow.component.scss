@@ -1,14 +1,22 @@
-$slideDuration: 10s;
+$slideDuration: var(--duration);
 $scale: 1.4;
+//$scale: var(--animation-scale);
+
+//--min-col-width: 156px;
+//var(--min-col-width)
+
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+
 }
-:root {
-  font-size: calc(0.5vw + 1vh + 0.5vmin);
+
+button {
+  font-size: var(--fsize);
 }
+
 
 .intro {
   position: relative;
@@ -56,19 +64,25 @@ $scale: 1.4;
 
 
 
-.FadeOut {
+img.FadeOut {
   @include fadeBlock();
   opacity: 1;
   //-webkit-animation: CrossFade 8s ;
-  animation: FadeOut $slideDuration forwards;
+  //animation: FadeOut $slideDuration forwards;
+  animation-name: FadeOut;
+  animation-duration: var( --duration );
+  animation-direction: normal;
 }
 
 
-.FadeIn {
+img.FadeIn {
   @include fadeBlock();
   opacity: 0;
   //-webkit-animation: CrossFade 8s ;
-  animation: FadeIn $slideDuration  forwards;
+  animation-name: FadeIn;
+  animation-duration: var( --duration );
+  //animation-duration: 10s;
+  animation-direction: normal;
 }
 
 
