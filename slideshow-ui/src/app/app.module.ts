@@ -5,6 +5,9 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { SlideshowComponent } from './slideshow/slideshow.component';
 import {HttpClientModule} from "@angular/common/http";
+import {TooltipModule} from "ngx-bootstrap/tooltip";
+import {ModalModule} from "ngx-bootstrap/modal";
+import {FormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -13,8 +16,12 @@ import {HttpClientModule} from "@angular/common/http";
   ],
   imports: [
     BrowserModule,
+    FormsModule,
     AppRoutingModule,
-    HttpClientModule
+    HttpClientModule,
+    TooltipModule.forRoot(),
+    ModalModule.forRoot(),
+
   ],
   providers: [],
   bootstrap: [AppComponent]
