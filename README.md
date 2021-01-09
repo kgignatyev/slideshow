@@ -25,9 +25,7 @@ in the browser visit http://localhost:8080/app, to change server port start app 
 
 Customization
 ---
+there is a modal dialog to adjust slide duration, for deeper changes
+ effects can be set in slideshow-ui/src/app/slideshow/slideshow.component.scss
 
-To adjust effects please edit slideshow-ui/src/app/slideshow/slideshow.component.scss
-
-*Note*: to show images longer time need to be adjusted in 2 place (todo: make it in one):
-we need to set **$slideDuration** in the slideshow.component.scss file and *slideshow.component.ts*.**animationDurationMilliseconds parameter**. 
 
