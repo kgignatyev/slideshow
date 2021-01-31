@@ -8,11 +8,13 @@ import io.ktor.features.*
 import io.ktor.gson.*
 import io.ktor.http.*
 import io.ktor.http.content.*
+import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import java.io.File
+import java.net.URLDecoder
 
 fun getProperty( key:String, defaultVal:String):String{
     println( "looking for parameter -D$key=...")
@@ -30,12 +32,14 @@ fun main(args: Array<String>) {
     println("will show photos from folder: $photosRoot")
     println("visit  http://localhost:$port/app to start slideshow")
 
-    val imagesSupplier = ImagesSupplier(File(photosRoot))
+    val photosDeleteDir = photosRoot+ "-deleted";
+    val imagesSupplier = ImagesSupplier(File(photosRoot), File(photosDeleteDir))
 
 
-
+    val resourceImages = "/api/images/"
     embeddedServer(Netty, port = port) {
         install(CORS){
+            this.methods.add(HttpMethod.Delete)
             anyHost()
         }
 
@@ -54,11 +58,14 @@ fun main(args: Array<String>) {
             get("/api/random-image") {
                 call.respond(imagesSupplier.getRandomImage())
             }
+            delete("${resourceImages}{...}") {
+                val uri = call.request.uri
+                val imgPath = URLDecoder.decode( uri.substring(resourceImages.length) )
+                call.respond(imagesSupplier.deleteImage(imgPath))
+            }
             static("images"){
                 staticRootFolder = imagesSupplier.rootDirForKtor()
                 files(imagesSupplier.filesForKtor())
-
-
             }
 
             static("app"){

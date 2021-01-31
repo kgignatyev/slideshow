@@ -1,7 +1,10 @@
-import {Component, OnInit, TemplateRef} from '@angular/core';
+import {Component, HostListener, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {Observable, Subscription, timer} from "rxjs";
 import {ImagesSupplierService} from "../images-supplier.service";
 import {BsModalRef, BsModalService} from "ngx-bootstrap/modal";
+import {PictureInfo} from "../data";
+import {faTrash} from '@fortawesome/free-solid-svg-icons';
+
 
 @Component({
   selector: 'app-slideshow',
@@ -18,15 +21,25 @@ export class SlideshowComponent implements OnInit {
   //used in modal
   duration = 0;
 
+  lastPhotos = new Array<PictureInfo>();
+
+  faDelete = faTrash
 
   // @ts-ignore
   modalRef: BsModalRef;
 
-  constructor( private imgSupplier:ImagesSupplierService, private modalService: BsModalService ) {
+  @ViewChild("lastPhotosTemplate")
+  lastPhotosModalTemplate: any;
+
+  constructor(private imgSupplier: ImagesSupplierService, private modalService: BsModalService) {
 
 
   }
 
+  @HostListener('document:keydown.meta.l')
+  openLastPhotosDialog() {
+    this.openLastPhotosModal(this.lastPhotosModalTemplate)
+  }
 
 
   image_link: string = '';
@@ -35,22 +48,22 @@ export class SlideshowComponent implements OnInit {
     this.setInitialImages();
 
     let storedDuration = localStorage.getItem("slideDuration")
-    if( !storedDuration ){
+    if (!storedDuration) {
       storedDuration = '10';
     }
-    const animationDurationSeconds:number = Number.parseInt( storedDuration );
+    const animationDurationSeconds: number = Number.parseInt(storedDuration);
 
-    this.setupTimer( animationDurationSeconds );
+    this.setupTimer(animationDurationSeconds);
 
   }
 
-  setupTimer(durationSeconds:number){
+  setupTimer(durationSeconds: number) {
     localStorage.setItem("slideDuration", "" + durationSeconds)
     document.documentElement.style.setProperty('--duration', durationSeconds + "s");
-    if( this.subscription ){
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-    this.timer = timer(durationSeconds*1000, durationSeconds*1000);
+    this.timer = timer(durationSeconds * 1000, durationSeconds * 1000);
     this.subscription = this.timer.subscribe(val => {
       this.runSequence()
     });
@@ -63,25 +76,34 @@ export class SlideshowComponent implements OnInit {
 
   }
 
-  async setInitialImages(){
-    let  url = await this.nextImage()
-
+  async setInitialImages() {
+    let url = await this.nextImageFullUrl()
     // @ts-ignore
     document.getElementById("i1").setAttribute("src", url)
-    url = await this.nextImage()
+    url = await this.nextImageFullUrl()
     // @ts-ignore
     document.getElementById("i2").setAttribute("src", url)
   }
 
-  async nextImage() {
+  async nextImageFullUrl() {
     // @ts-ignore
-    let imageInfo:any = this.imgSupplier.getNextImage();
-    const nextImageUri = imageInfo['uri']
-    const nextImage = "http://localhost:8080/images/" + nextImageUri
+    let imageInfo: PictureInfo = await this.imgSupplier.getNextImage();
+    const nextImageUri = imageInfo.uri
+    const nextImage = this.getFullImageUrl(nextImageUri)
     return nextImage;
   }
 
+  getFullImageUrl(uri: String) {
+    return "http://localhost:8080/images/" + uri;
+  }
+
   async runSequence() {
+    const nextImageUrl = await this.nextImageFullUrl()
+    this.setImage(nextImageUrl, true)
+  }
+
+
+  setImage(fullImageUrl: string, next: boolean) {
     // @ts-ignore
     let elementById1 = document.getElementById("i1");
     // @ts-ignore
@@ -95,18 +117,31 @@ export class SlideshowComponent implements OnInit {
     // @ts-ignore
     elementById2.setAttribute("class", e1class)
 
+
     // @ts-ignore
-    const nextImageUri =  this.imgSupplier.getNextImage()['uri']
-    const nextImage = "http://localhost:8080/images/" + nextImageUri
+    const e1Opacity = parseFloat( getComputedStyle(elementById1).opacity );
+    // @ts-ignore
+    const e2Opacity = parseFloat( getComputedStyle(elementById2).opacity );
     // debugger
-    if (e1class == 'FadeIn') {
-      // @ts-ignore
-      elementById2.setAttribute("src", nextImage )
-    } else {
-      // @ts-ignore
-      elementById1.setAttribute("src", nextImage )
+    if( next ) {
+      if (e1Opacity > e2Opacity) {
+        // @ts-ignore
+        elementById2.setAttribute("src", fullImageUrl)
+      } else {
+        // @ts-ignore
+        elementById1.setAttribute("src", fullImageUrl)
+      }
+    }else{
+      if (e1Opacity > e2Opacity) {
+        // @ts-ignore
+        elementById1.setAttribute("src", fullImageUrl)
+      } else {
+        // @ts-ignore
+        elementById2.setAttribute("src", fullImageUrl)
+      }
     }
   }
+
 
   setClassToSecond() {
     // @ts-ignore
@@ -120,21 +155,35 @@ export class SlideshowComponent implements OnInit {
     const requestFullScreen = docEl.requestFullscreen;
     const cancelFullScreen = doc.exitFullscreen;
 
-    if(!doc.fullscreenElement ) {
+    if (!doc.fullscreenElement) {
       requestFullScreen.call(docEl);
-    }
-    else {
+    } else {
       cancelFullScreen.call(doc);
     }
   }
 
-  openModal(template: TemplateRef<any>) {
-    this.duration = Number.parseInt( ""+ localStorage.getItem("slideDuration") );
+  openSettingsModal(template: TemplateRef<any>) {
+    this.duration = Number.parseInt("" + localStorage.getItem("slideDuration"));
     this.modalRef = this.modalService.show(template);
   }
 
   setDuration() {
-    this.setupTimer( this.duration )
+    this.setupTimer(this.duration)
     this.modalRef.hide();
+  }
+
+  openLastPhotosModal(lastPhotosTemplate: TemplateRef<any>) {
+    this.lastPhotos = this.imgSupplier.lastPhotos;
+    this.modalRef = this.modalService.show(lastPhotosTemplate, {class: 'modal-lg'});
+  }
+
+  deleteImage(p: PictureInfo, imgIndex: number) {
+    this.imgSupplier.deleteImage(p.uri).then(pi => {
+      this.lastPhotos.splice(imgIndex, 1)
+    })
+  }
+
+  showPhoto(p: PictureInfo) {
+    this.setImage( this.getFullImageUrl( p.uri), false);
   }
 }

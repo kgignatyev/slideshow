@@ -1,21 +1,62 @@
 <div id="CrossFade">
 
-  <img id="i1" src="/assets/DSC_6151.jpg" class="FadeOut"  alt="img"/>
-  <img id="i2" src="/assets/DSC_6156.jpg" class="FadeIn"  alt="img"/>
+  <img id="i1" src="/assets/DSC_6151.jpg" class="FadeOut" alt="img"/>
+  <img id="i2" src="/assets/DSC_6156.jpg" class="FadeIn" alt="img"/>
 
   <div class="intro">
     <h4>{{image_link}}</h4>
     <button class="btn btn-link" (click)="toggleFullScreen()"
-            tooltip="Full Screen Mode" >f</button>
+            tooltip="Full Screen Mode">f
+    </button>
     <br/>
     <button type="button" tooltip="Settings"
-            class="btn btn-link" (click)="openModal(template)">s</button>
+            class="btn btn-link" (click)="openSettingsModal(settingsTemplate)">s
+    </button>
+    <br/>
+    <button type="button" tooltip="Last Photos"
+            class="btn btn-link" (click)="openLastPhotosModal(lastPhotosTemplate)">l
+    </button>
   </div>
 
 </div>
 
 
-<ng-template #template>
+<ng-template #lastPhotosTemplate>
+
+  <div class="modal-header">
+    <h4 class="modal-title"> Last Photos</h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div *ngFor="let p of lastPhotos; let imgIndex = index">
+      <div class="row">
+              <div class="col-md-12">{{p.uri}}</div>
+      </div>
+      <div class="row">
+        <div class="col-md-10">
+
+          <img src="{{getFullImageUrl(p.uri)}}" width="200" (click)="showPhoto(p)">
+
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-link" (click)="deleteImage(p,imgIndex)">
+            <fa-icon [icon]="faDelete"></fa-icon>
+            Delete
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <div>
+  </div>
+
+
+</ng-template>
+
+<ng-template #settingsTemplate>
   <div class="modal-header">
     <h3 class="modal-title pull-left">Settings</h3>
     <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
@@ -26,8 +67,8 @@
     Slide duration <input [(ngModel)]="duration"/> seconds
   </div>
   <div>
-  <button type="button" class="btn badge-primary"  (click)="setDuration()">
-    Set New Duration
-  </button>
+    <button type="button" class="btn badge-primary" (click)="setDuration()">
+      Set New Duration
+    </button>
   </div>
 </ng-template>
