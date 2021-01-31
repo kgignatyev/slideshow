@@ -6,12 +6,29 @@ import {HttpClient} from "@angular/common/http";
 })
 export class ImagesSupplierService {
 
+  lastPhotos = new Array();
+  lastPhotosLength = 10;
+
   constructor( public http:HttpClient) {
 
   }
 
-  getNextImage(){
-    return this.http.get("http://localhost:8080/api/random-image").toPromise()
+  listLastPhotos(): any[]{
+    const myClonedArray = new Array<any>();
+    this.lastPhotos.forEach(val => myClonedArray.push(Object.assign({}, val)));
+    return myClonedArray;
   }
 
+  async getNextImage(){
+    let picture = await this.http.get("http://localhost:8080/api/random-image").toPromise();
+    this.pushPhoto(picture)
+    return picture
+  }
+
+  private pushPhoto(picture: any) {
+    this.lastPhotos.push(picture)
+    if( this.lastPhotos.length> this.lastPhotosLength){
+      this.lastPhotos.splice( this.lastPhotosLength-1);
+    }
+  }
 }

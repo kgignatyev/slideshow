@@ -75,7 +75,7 @@ export class SlideshowComponent implements OnInit {
 
   async nextImage() {
     // @ts-ignore
-    let imageInfo:any = await this.imgSupplier.getNextImage();
+    let imageInfo:any = this.imgSupplier.getNextImage();
     const nextImageUri = imageInfo['uri']
     const nextImage = "http://localhost:8080/images/" + nextImageUri
     return nextImage;
@@ -96,7 +96,7 @@ export class SlideshowComponent implements OnInit {
     elementById2.setAttribute("class", e1class)
 
     // @ts-ignore
-    const nextImageUri = (await this.imgSupplier.getNextImage())['uri']
+    const nextImageUri =  this.imgSupplier.getNextImage()['uri']
     const nextImage = "http://localhost:8080/images/" + nextImageUri
     // debugger
     if (e1class == 'FadeIn') {
