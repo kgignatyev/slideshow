@@ -12,7 +12,7 @@ plugins {
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
     id("org.jetbrains.kotlin.jvm") version "1.3.72"
 
-    id("com.github.johnrengelman.shadow") version "5.0.0"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
     // Apply the application plugin to add support for building a CLI application in Java.
     application
 }
@@ -57,6 +57,8 @@ dependencies {
 application {
     // Define the main class for the application.
     mainClass.set("images.server.AppKt")
+    //needed for shadowjar
+    mainClassName = "images.server.AppKt"
 
 }
 
