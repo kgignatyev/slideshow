@@ -30,7 +30,7 @@
     </button>
   </div>
   <div class="modal-body">
-    <div *ngFor="let p of lastPhotos; let imgIndex = index">
+    <div *ngFor="let p of this.imgSupplier.lastPhotos; let imgIndex = index">
       <div class="row">
               <div class="col-md-12">{{p.uri}}</div>
       </div>

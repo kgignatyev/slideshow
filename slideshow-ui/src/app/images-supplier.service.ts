@@ -8,7 +8,7 @@ import {PictureInfo} from "./data";
 export class ImagesSupplierService {
 
   public lastPhotos = new Array<PictureInfo>();
-  lastPhotosLength = 10;
+  lastPhotosLength = 5;
   imageServerBaseUrl = "http://localhost:8080/api";
   constructor( public http:HttpClient) {
 
@@ -27,15 +27,21 @@ export class ImagesSupplierService {
     return  picture
   }
 
-  async deleteImage(imageUri:string): Promise< Boolean>{
+  async deleteImage(imageUri: string, imgIndex: number): Promise<Boolean>{
     let pictureDeleted:boolean = (await this.http.delete(this.imageServerBaseUrl + "/images/"+ imageUri).toPromise()) as boolean;
+    const idxToDelete = this.lastPhotos.findIndex( (pi, idx)=>{
+      return  pi.uri  == imageUri
+    } )
+    if( idxToDelete!= -1) {
+      this.lastPhotos.splice(idxToDelete, 1);
+    }
     return  pictureDeleted
   }
 
   private pushPhoto(picture: any) {
     this.lastPhotos.push(picture)
     if( this.lastPhotos.length> this.lastPhotosLength){
-      this.lastPhotos.splice( this.lastPhotosLength-1);
+      this.lastPhotos.splice( 0,1);
     }
   }
 }

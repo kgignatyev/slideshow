@@ -21,7 +21,6 @@ export class SlideshowComponent implements OnInit {
   //used in modal
   duration = 0;
 
-  lastPhotos = new Array<PictureInfo>();
 
   faDelete = faTrash
 
@@ -31,7 +30,7 @@ export class SlideshowComponent implements OnInit {
   @ViewChild("lastPhotosTemplate")
   lastPhotosModalTemplate: any;
 
-  constructor(private imgSupplier: ImagesSupplierService, private modalService: BsModalService) {
+  constructor(public imgSupplier: ImagesSupplierService, private modalService: BsModalService) {
 
 
   }
@@ -173,14 +172,12 @@ export class SlideshowComponent implements OnInit {
   }
 
   openLastPhotosModal(lastPhotosTemplate: TemplateRef<any>) {
-    this.lastPhotos = this.imgSupplier.lastPhotos;
+
     this.modalRef = this.modalService.show(lastPhotosTemplate, {class: 'modal-lg'});
   }
 
   deleteImage(p: PictureInfo, imgIndex: number) {
-    this.imgSupplier.deleteImage(p.uri).then(pi => {
-      this.lastPhotos.splice(imgIndex, 1)
-    })
+    this.imgSupplier.deleteImage(p.uri, imgIndex);
   }
 
   showPhoto(p: PictureInfo) {
