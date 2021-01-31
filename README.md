@@ -28,4 +28,9 @@ Customization
 there is a modal dialog to adjust slide duration, for deeper changes
  effects can be set in slideshow-ui/src/app/slideshow/slideshow.component.scss
 
+Last Images
+---
 
+Cmd+l opens a modal dialog with the list of last images, by clicking on image it will be displayed again, or 
+it can be deleted. This moves image to the peer directory fo root that has _deleted suffix, and subdirectory
+structure is retained
