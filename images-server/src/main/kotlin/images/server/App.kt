@@ -3,16 +3,17 @@
  */
 package images.server
 
-import io.ktor.application.*
-import io.ktor.features.*
-import io.ktor.gson.*
+import io.ktor.server.application.*
+import io.ktor.server.plugins.cors.*
 import io.ktor.http.*
-import io.ktor.http.content.*
-import io.ktor.request.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.serialization.gson.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import io.ktor.server.engine.*
+import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
 import java.io.File
 import java.net.URLDecoder
 
@@ -42,6 +43,9 @@ fun main(args: Array<String>) {
             this.methods.add(HttpMethod.Delete)
             anyHost()
         }
+        install(Routing){
+
+        }
 
         install(ContentNegotiation) {
             gson {
@@ -63,22 +67,18 @@ fun main(args: Array<String>) {
                 val imgPath = URLDecoder.decode( uri.substring(resourceImages.length) )
                 call.respond(imagesSupplier.deleteImage(imgPath))
             }
-            static("images"){
-                staticRootFolder = imagesSupplier.rootDirForKtor()
-                files(imagesSupplier.filesForKtor())
-            }
+//            static("images"){
+//                staticRootFolder = imagesSupplier.rootDirForKtor()
+//                files(imagesSupplier.filesForKtor())
+//            }
+            staticFiles("/images", imagesSupplier.rootFolder )
 
-            static("app"){
-
-                files("slideshow-spa")
-                default("slideshow-spa/index.html")
-            }
+            staticFiles("/app", File("slideshow-spa"), index = "index.html")
         }
 
 
     }.start(true)
 }
 
-data class HelloWorld(val hello: String)
 
 
