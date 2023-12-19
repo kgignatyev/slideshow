@@ -1,3 +1,5 @@
-export interface PictureInfo {
+export interface PictureAndCatalogInfo {
    uri:string;
+   numImages:number;
+   lastUpdated:number;
 }

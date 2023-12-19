@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {PictureInfo} from "./data";
+import {PictureAndCatalogInfo} from "./data";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ImagesSupplierService {
 
-  public lastPhotos = new Array<PictureInfo>();
+  public lastPhotos = new Array<PictureAndCatalogInfo>();
   lastPhotosLength = 5;
   imageServerBaseUrl = "http://localhost:8080/api";
+  public lastPhoto: PictureAndCatalogInfo | undefined;
   constructor( public http:HttpClient) {
 
   }
@@ -20,11 +21,12 @@ export class ImagesSupplierService {
     return myClonedArray;
   }
 
-  async getNextImage(): Promise< PictureInfo>{
+  async getNextImage(): Promise< PictureAndCatalogInfo>{
 
-    let picture:PictureInfo = (await this.http.get(this.imageServerBaseUrl + "/random-image").toPromise()) as PictureInfo;
-    this.pushPhoto(picture)
-    return  picture
+    let pictureAndCatalogInfo:PictureAndCatalogInfo = (await this.http.get(this.imageServerBaseUrl + "/random-image").toPromise()) as PictureAndCatalogInfo;
+    this.lastPhoto = pictureAndCatalogInfo;
+    this.pushPhoto(pictureAndCatalogInfo)
+    return  pictureAndCatalogInfo
   }
 
   async deleteImage(imageUri: string, imgIndex: number): Promise<Boolean>{
@@ -43,5 +45,15 @@ export class ImagesSupplierService {
     if( this.lastPhotos.length> this.lastPhotosLength){
       this.lastPhotos.splice( 0,1);
     }
+  }
+
+  lastModified(): Date {
+    var d = new Date(0);
+    if(this.lastPhoto) {
+      d = new Date(this.lastPhoto.lastUpdated );
+    }
+    console.info(this.lastPhoto, d)
+    return d
+
   }
 }

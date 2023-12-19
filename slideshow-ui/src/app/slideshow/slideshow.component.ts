@@ -2,7 +2,7 @@ import {Component, HostListener, OnInit, TemplateRef, ViewChild} from '@angular/
 import {Observable, Subscription, timer} from "rxjs";
 import {ImagesSupplierService} from "../images-supplier.service";
 import {BsModalRef, BsModalService} from "ngx-bootstrap/modal";
-import {PictureInfo} from "../data";
+import {PictureAndCatalogInfo} from "../data";
 import {faTrash} from '@fortawesome/free-solid-svg-icons';
 
 
@@ -86,7 +86,7 @@ export class SlideshowComponent implements OnInit {
 
   async nextImageFullUrl() {
     // @ts-ignore
-    let imageInfo: PictureInfo = await this.imgSupplier.getNextImage();
+    let imageInfo: PictureAndCatalogInfo = await this.imgSupplier.getNextImage();
     const nextImageUri = imageInfo.uri
     const nextImage = this.getFullImageUrl(nextImageUri)
     return nextImage;
@@ -176,11 +176,13 @@ export class SlideshowComponent implements OnInit {
     this.modalRef = this.modalService.show(lastPhotosTemplate, {class: 'modal-lg'});
   }
 
-  deleteImage(p: PictureInfo, imgIndex: number) {
+  deleteImage(p: PictureAndCatalogInfo, imgIndex: number) {
     this.imgSupplier.deleteImage(p.uri, imgIndex);
   }
 
-  showPhoto(p: PictureInfo) {
+  showPhoto(p: PictureAndCatalogInfo) {
     this.setImage( this.getFullImageUrl( p.uri), false);
   }
+
+
 }
