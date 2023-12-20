@@ -4,14 +4,13 @@ import java.io.File
 import java.lang.Exception
 import java.nio.file.Files
 import java.util.*
-import kotlin.time.Duration.Companion.seconds
 
 
 class ImagesSupplier(val rootFolder: File, val deletedPhotosFolder: File):Runnable {
 
 
 
-    var _listOfImages:MutableList<ImageInfo> = mutableListOf()
+    var _listOfImages:MutableList<String> = mutableListOf()
     val listOfImagesLock = "listOfImagesLock"
     val rnd = Random()
 
@@ -34,32 +33,34 @@ class ImagesSupplier(val rootFolder: File, val deletedPhotosFolder: File):Runnab
         return rootFolder.parentFile
     }
 
-    fun filesForKtor():String { return rootFolder.name }
 
-
-
-    fun  getRandomImage():ImageInfo{
+    fun  getRandomImage():ImageAndCatalogInfo{
         val listOfImages = getListOfImages()
-        return listOfImages[rnd.nextInt( listOfImages.size )]
+        val imageUri = listOfImages[rnd.nextInt( listOfImages.size )]
+        val lastUpdated = lastImageUpdate
+        val numImages = listOfImages.size
+        return ImageAndCatalogInfo(imageUri, numImages, lastUpdated)
     }
 
     var lastImageUpdate:Long = 0L
     fun hasImageUpdates():Boolean {
         var lastModified = 0L
+        var count = 0
         rootFolder.walkTopDown().forEach { file ->
             if( isImageFile(file) ) {
                 val updateTime = file.lastModified()
+                count ++
                 if( lastModified < updateTime ){
                     lastModified = updateTime
                 }
             }
         }
-        return lastImageUpdate != lastModified
+        return lastImageUpdate != lastModified || count != getListOfImages().size
     }
     fun collectAllFiles() {
         val rootFolderName = rootFolder.absolutePath
         println("Collecting images in folder $rootFolderName")
-        val bufferForImages:MutableList<ImageInfo> = mutableListOf()
+        val bufferForImages:MutableList<String> = mutableListOf()
         var counter = 0
         var lastModified = 0L
         rootFolder.walkTopDown().forEach { file ->
@@ -69,7 +70,7 @@ class ImagesSupplier(val rootFolder: File, val deletedPhotosFolder: File):Runnab
                       lastModified = updateTime
                  }
                  val uri = file.absolutePath.substring(rootFolderName.length + 1)
-                 bufferForImages.add(ImageInfo(uri))
+                 bufferForImages.add(uri)
 //                 println(" $uri")
                  counter ++
              }
@@ -80,12 +81,12 @@ class ImagesSupplier(val rootFolder: File, val deletedPhotosFolder: File):Runnab
         println("Collected $counter images")
     }
 
-    private fun setlistOfImages(images: MutableList<ImageInfo>) {
+    private fun setlistOfImages(images: MutableList<String>) {
         synchronized( listOfImagesLock) {
             _listOfImages = images
         }
     }
-    private fun getListOfImages(): MutableList<ImageInfo> {
+    private fun getListOfImages(): MutableList<String> {
         synchronized(listOfImagesLock){
             return _listOfImages
         }
@@ -106,7 +107,7 @@ class ImagesSupplier(val rootFolder: File, val deletedPhotosFolder: File):Runnab
                newFileFolder.mkdirs()
            }
            Files.move(originalFile.toPath(), newFileLocation.toPath())
-           val deleted = getListOfImages().removeIf { ii -> ii.uri == imgPath }
+           val deleted = getListOfImages().removeIf { ii -> ii == imgPath }
            if (deleted) {
                println("Image was deleted:$imgPath")
            }
@@ -134,4 +135,4 @@ class ImagesSupplier(val rootFolder: File, val deletedPhotosFolder: File):Runnab
 }
 
 
-data class ImageInfo( val uri:String)
+data class ImageAndCatalogInfo(val uri:String, val numImages:Int, val lastUpdated:Long)

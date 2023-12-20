@@ -31,6 +31,7 @@ fun main(args: Array<String>) {
     val port = getProperty("port","8080" ).toInt()
     val photosRoot = getProperty("photos-root","/Volumes/kgi-backup/photos/light_room" )
     println("will show photos from folder: $photosRoot")
+    println("to change location set property -Dphotos-root=<desired location>")
     println("visit  http://localhost:$port/app to start slideshow")
 
     val photosDeleteDir = photosRoot+ "-deleted";
